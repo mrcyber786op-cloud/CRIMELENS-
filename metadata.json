@@ -1,0 +1,7 @@
+{
+  "name": "CRIMELENS",
+  "description": "Professional Forensic Investigation, Digital Evidence Services & Forensic Science Learning Academy",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
