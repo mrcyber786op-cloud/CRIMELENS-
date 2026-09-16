@@ -103,9 +103,11 @@ Role: ${regForm.role}`,
   }
 };
 
-  const handleCourseEnroll = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCourseEnrolled(true);
+  const [courseForm, setCourseForm] = useState({
+  name: '',
+  email: '',
+  affiliation: ''
+});
     confetti({ particleCount: 70, spread: 70, origin: { y: 0.7 } });
   };
 
