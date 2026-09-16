@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { submitEnquiry } from '../api';
 import confetti from 'canvas-confetti';
 import {
   FORENSIC_WEBINARS,
@@ -71,11 +72,36 @@ export const ForensicAcademy: React.FC<ForensicAcademyProps> = ({
   // Career Explorer State
   const [selectedCareer, setSelectedCareer] = useState<CareerPath>(CAREER_PATHS[0]);
 
-  const handleWebinarRegister = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleWebinarRegister = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!selectedWebinar) return;
+
+  try {
+    await submitEnquiry({
+      name: regForm.name,
+      email: regForm.email,
+      service: 'Webinar Registration',
+      message: `Webinar Registration
+
+Webinar: ${selectedWebinar.title}
+Date: ${selectedWebinar.date}
+Time: ${selectedWebinar.time}
+Role: ${regForm.role}`,
+    });
+
     setRegistrationSuccess(true);
-    confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
-  };
+
+    confetti({
+      particleCount: 50,
+      spread: 60,
+      origin: { y: 0.7 },
+    });
+  } catch (error) {
+    console.error('Webinar registration failed:', error);
+    alert('Registration submit nahi ho paayi. Please try again.');
+  }
+};
 
   const handleCourseEnroll = (e: React.FormEvent) => {
     e.preventDefault();
