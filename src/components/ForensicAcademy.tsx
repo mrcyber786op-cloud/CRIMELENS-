@@ -103,7 +103,9 @@ Role: ${regForm.role}`,
   }
 };
 
-  const [courseForm, setCourseForm] = useState({
+  const [selectedCourse, setSelectedCourse] = useState<ForensicWeekCourse | null>(null);
+const [courseEnrolled, setCourseEnrolled] = useState(false);
+const [courseForm, setCourseForm] = useState({
   name: '',
   email: '',
   affiliation: ''
