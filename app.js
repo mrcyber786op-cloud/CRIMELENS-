@@ -1,3 +1,13 @@
-async function load(type,id){const r=await fetch('/api/content/'+type);const data=await r.json();const el=document.getElementById(id);if(!Array.isArray(data)||!data.length){el.innerHTML='<p class="muted">No content added yet.</p>';return}el.innerHTML=data.map(x=>`<article class="card">${x.image?`<img src="${x.image}" alt="">`:''}<h3>${esc(x.title)}</h3><p>${esc(x.description)}</p>${x.link?`<a class="btn" href="${esc(x.link)}" target="_blank" rel="noopener">View</a>`:''}</article>`).join('')}
-function esc(s=''){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
-document.getElementById('year').textContent=new Date().getFullYear();load('course','course-list');load('webinar','webinar-list');load('gallery','gallery-list');load('post','post-list');
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="CRIMELENS — Forensic Learning, Webinars, Courses and Study Material" />
+    <title>CRIMELENS | Forensic Learning</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
