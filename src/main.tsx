@@ -1,18 +1,16 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="CRIMELENS — Forensic Investigation, Digital Evidence Services, webinars, courses and learning opportunities."
-    />
-    <title>CRIMELENS | Forensic Investigation & Digital Evidence</title>
-  </head>
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+import './index.css';
 
-  <body>
-    <div id="root"></div>
+const root = document.getElementById('root');
 
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+if (!root) {
+  throw new Error('Root element not found');
+}
+
+createRoot(root).render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);
