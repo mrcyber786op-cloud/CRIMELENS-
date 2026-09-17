@@ -1,7 +1,6 @@
 // CRIMELENS Backend API
-// Replace the URL below with your live Render backend URL.
 
-export const API_BASE_URL = 'https://YOUR-RENDER-BACKEND.onrender.com';
+export const API_BASE_URL = 'https://crimelens-r5qr.onrender.com';
 
 export async function apiRequest<T>(
   endpoint: string,
@@ -25,19 +24,19 @@ export async function apiRequest<T>(
 }
 
 export async function getCourses() {
-  return apiRequest('/api/courses');
+  return apiRequest('/api/content/course');
 }
 
 export async function getWebinars() {
-  return apiRequest('/api/webinars');
+  return apiRequest('/api/content/webinar');
 }
 
 export async function getPosts() {
-  return apiRequest('/api/posts');
+  return apiRequest('/api/content/post');
 }
 
 export async function getGallery() {
-  return apiRequest('/api/gallery');
+  return apiRequest('/api/content/gallery');
 }
 
 export async function submitEnquiry(data: {
