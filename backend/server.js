@@ -3,7 +3,6 @@ require('dotenv').config();
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
-
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
@@ -15,11 +14,9 @@ const multer = require('multer');
 const cors = require('cors');
 
 const app = express();
+const PORT = Number(process.env.PORT || 10000);
 
-const PORT = Number(process.env.PORT || 3000);
-const ROOT = __dirname;
-const UPLOADS = path.join(ROOT, 'uploads');
-
+const UPLOADS = path.join(__dirname, 'uploads');
 fs.mkdirSync(UPLOADS, { recursive: true });
 
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
@@ -198,18 +195,18 @@ function cleanUrl(value) {
   try {
     const url = new URL(value);
 
-    if (['http:', 'https:'].includes(url.protocol)) {
-      return url.toString();
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      return '';
     }
 
-    return '';
+    return url.toString();
   } catch {
     return '';
   }
 }
 
 /* Health check */
-app.get('/', (req, res) => {
+app.get('/', (_, res) => {
   res.json({
     ok: true,
     service: 'CRIMELENS Backend',
@@ -245,7 +242,7 @@ app.post('/api/auth/login', async (req, res) => {
     res.cookie('crimelens_admin', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 2 * 60 * 60 * 1000,
       path: '/'
     });
@@ -256,7 +253,9 @@ app.post('/api/auth/login', async (req, res) => {
         username: admin.username
       }
     });
-  } catch {
+  } catch (error) {
+    console.error(error);
+
     res.status(500).json({
       error: 'Login failed'
     });
@@ -267,7 +266,7 @@ app.post('/api/auth/logout', (req, res) => {
   res.clearCookie('crimelens_admin', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: 'none',
     path: '/'
   });
 
@@ -296,21 +295,21 @@ app.get('/api/content/:type', async (req, res) => {
       });
     }
 
-    const data = await Item.find({
-      type
-    })
+    const data = await Item.find({ type })
       .sort({ createdAt: -1 })
       .lean();
 
     res.json(data);
-  } catch {
+  } catch (error) {
+    console.error(error);
+
     res.status(500).json({
       error: 'Database error'
     });
   }
 });
 
-/* Admin create content */
+/* Create content */
 app.post(
   '/api/content/:type',
   auth,
@@ -328,13 +327,6 @@ app.post(
       const title = String(req.body.title || '').trim();
 
       if (!title) {
-        if (req.file) {
-          fs.rmSync(
-            path.join(UPLOADS, req.file.filename),
-            { force: true }
-          );
-        }
-
         return res.status(400).json({
           error: 'Title is required'
         });
@@ -355,7 +347,9 @@ app.post(
       });
 
       res.status(201).json(doc);
-    } catch {
+    } catch (error) {
+      console.error(error);
+
       if (req.file) {
         fs.rmSync(
           path.join(UPLOADS, req.file.filename),
@@ -370,7 +364,7 @@ app.post(
   }
 );
 
-/* Admin update content */
+/* Update content */
 app.put(
   '/api/content/:type/:id',
   auth,
@@ -416,20 +410,23 @@ app.put(
         if (doc.image) {
           fs.rmSync(
             path.join(
-              ROOT,
+              __dirname,
               doc.image.replace(/^\//, '')
             ),
             { force: true }
           );
         }
 
-        doc.image = '/uploads/' + req.file.filename;
+        doc.image =
+          '/uploads/' + req.file.filename;
       }
 
       await doc.save();
 
       res.json(doc);
-    } catch {
+    } catch (error) {
+      console.error(error);
+
       if (req.file) {
         fs.rmSync(
           path.join(UPLOADS, req.file.filename),
@@ -444,7 +441,7 @@ app.put(
   }
 );
 
-/* Admin delete content */
+/* Delete content */
 app.delete(
   '/api/content/:type/:id',
   auth,
@@ -472,7 +469,7 @@ app.delete(
       if (doc.image) {
         fs.rmSync(
           path.join(
-            ROOT,
+            __dirname,
             doc.image.replace(/^\//, '')
           ),
           { force: true }
@@ -482,7 +479,9 @@ app.delete(
       res.json({
         ok: true
       });
-    } catch {
+    } catch (error) {
+      console.error(error);
+
       res.status(500).json({
         error: 'Could not delete'
       });
@@ -501,15 +500,20 @@ app.use(
 
 /* Start server */
 async function bootstrap() {
-  await mongoose.connect(process.env.MONGO_URL, {
-    dbName: process.env.DB_NAME || 'crimelens'
-  });
+  await mongoose.connect(
+    process.env.MONGO_URL,
+    {
+      dbName: process.env.DB_NAME || 'crimelens'
+    }
+  );
 
   const username = String(
     process.env.ADMIN_USERNAME || 'admin'
   ).trim();
 
-  let admin = await Admin.findOne({ username });
+  let admin = await Admin.findOne({
+    username
+  });
 
   if (!admin) {
     admin = await Admin.create({
@@ -533,4 +537,16 @@ async function bootstrap() {
 
   app.listen(PORT, () => {
     console.log(
-      `CRIMELENS backend running on port
+      `CRIMELENS backend running on port ${PORT}`
+    );
+  });
+}
+
+bootstrap().catch((error) => {
+  console.error(
+    'Startup failed:',
+    error.message
+  );
+
+  process.exit(1);
+});
